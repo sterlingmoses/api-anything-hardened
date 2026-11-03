@@ -9,16 +9,20 @@ import { accessSync, constants, copyFileSync, existsSync, mkdirSync, readFileSyn
 import { homedir } from "node:os";
 import { delimiter, dirname, join } from "node:path";
 import { createInterface } from "node:readline/promises";
+import { fileURLToPath } from "node:url";
 import { browserChoice } from "./browser.js";
-import { answerShare, ensureKey, keyFile, loadSettings, QUESTION } from "./identity.js";
+import { keyFile } from "./identity.js";
 
 export interface Entry {
   command: string;
   args: string[];
   env?: Record<string, string>;
 }
-/** The entry for agents that start from the user's shell (Claude Code, Codex) and so find npx on PATH. */
-export const SERVER: Entry = { command: "npx", args: ["-y", "api-anything", "mcp"] };
+/**
+ * Local copy: run this checkout's own build, never `npx -y api-anything` (which would fetch whatever
+ * version npm has at each start).
+ */
+export const SERVER: Entry = { command: "node", args: [fileURLToPath(new URL("./cli.js", import.meta.url)), "mcp"] };
 const NAME = "api-anything";
 
 export const AGENTS = ["claude-code", "codex", "cursor", "claude-desktop"] as const;
@@ -215,7 +219,8 @@ function claudeCodeServer(dryRun: boolean): AgentResult {
 
 /** The package's SKILL.md, copied where the agent reads skills; an older copy is backed up, then replaced. */
 function installSkill(file: string, dryRun: boolean): Pick<AgentResult, "skill" | "skillFile" | "skillBackup"> {
-  const text = readFileSync(SKILL, "utf8");
+  // the skill names this checkout's CLI by its absolute path, filled in here, not in the repo
+  const text = readFileSync(SKILL, "utf8").replaceAll("node <repo>/dist/cli.js", `node ${SERVER.args[0]}`);
   const had = existsSync(file) ? readFileSync(file, "utf8") : undefined;
   if (had === text) return { skill: "unchanged", skillFile: file };
   if (dryRun) return { skill: had === undefined ? "would install" : "would update", skillFile: file };
@@ -269,7 +274,8 @@ export interface SetupResult {
 
 export async function setup(o: SetupOptions = {}): Promise<SetupResult> {
   const dryRun = !!o.dryRun;
-  const agents = (o.agents ?? detect()).map((a) => connect(a, dryRun));
+  // local copy: Claude Code only; other agents' configs are never touched
+  const agents = (o.agents ?? detect()).filter((a) => a === "claude-code").map((a) => connect(a, dryRun));
 
   const b = browserChoice();
   const browser = {
@@ -278,18 +284,9 @@ export async function setup(o: SetupOptions = {}): Promise<SetupResult> {
     note: "a Chromium browser is needed only to learn sites; calls to shared operations work without one",
   };
 
-  const hadKey = existsSync(keyFile());
-  const key: SetupResult["key"] = dryRun
-    ? hadKey
-      ? { file: keyFile(), created: false }
-      : { file: keyFile(), wouldCreate: true }
-    : { file: keyFile(), created: !hadKey, publicKey: ensureKey().publicKey };
-
-  const before = loadSettings();
-  let share = o.share;
-  if (share === undefined && !before.askedAt && o.ask && !dryRun) share = await o.ask(QUESTION);
-  if (share !== undefined && !dryRun) answerShare(share);
-  const answer = share ?? (before.askedAt ? before.share : undefined);
+  // local copy: no install key (it only signed registry requests) and sharing is always off
+  const key: SetupResult["key"] = { file: keyFile(), created: false };
+  const answer = false;
 
   return {
     ok: agents.every((a) => a.mcp !== "failed"),

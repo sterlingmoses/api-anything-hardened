@@ -246,7 +246,7 @@ test("MCP names the tool for a next step one of its tools takes, with the call's
   // x was never imported, so the tool's import has nothing to refresh: the user runs it in a terminal
   assert.match(
     mcpNext("ask the user to run: api-anything login x; then retry once"),
-    /^ask the user to run in a terminal: api-anything login x \(it imports/,
+    /^ask the user to run in a terminal: api-anything login x --window/,
   );
   assert.equal(mcpNextCall({ action: "fix_args", site: "x" }).tool, "list_operations");
   // with no site (learn_site's own args) there is no list_operations call to make: one without its site is invalid
@@ -300,7 +300,7 @@ test("MCP points an auth failure at the login tool only for a session the user i
     const r = await s.tool("call_operation", { site: "fresh", op: "me" });
     assert.equal(r.class, "auth", JSON.stringify(r));
     assert.deepEqual([r.nextCall.action, r.nextCall.tool], ["login", undefined]);
-    assert.match(r.next, /ask the user to run in a terminal: api-anything login fresh \(.*no password\)/);
+    assert.match(r.next, /ask the user to run in a terminal: api-anything login fresh --window/);
     assert.match(r.next, /api-anything login fresh --window to sign in by hand/);
     assert.doesNotMatch(r.next, /login tool/);
     const login = await s.tool("login", { site: "fresh" });

@@ -18,7 +18,9 @@ const inject = (roots: BrowserRoot[]) => (process.env.API_ANYTHING_BROWSER_ROOTS
 const li = { host_key: ".linkedin.com", name: "li_at", value: "AQEDreallylongtokenvalue" };
 const js = { host_key: ".linkedin.com", name: "JSESSIONID", value: '"ajax:1234567890"' };
 
-test("decrypts a v10 Chromium cookie (meta version >= 24 strips the host_key hash)", () => {
+test("decrypts a v10 Chromium cookie (meta version >= 24 strips the host_key hash)", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const root = tmp();
   makeChromiumDb(join(root, "Default"), [li, js], { password: "s3cret-keychain-pw", metaVersion: 24 });
   inject([{ name: "Chrome", family: "chromium", root, password: "s3cret-keychain-pw" }]);
@@ -31,7 +33,9 @@ test("decrypts a v10 Chromium cookie (meta version >= 24 strips the host_key has
   assert.equal(byName.JSESSIONID, '"ajax:1234567890"', "quotes preserved for the csrf transform");
 });
 
-test("a real-world expires_utc (beyond JS safe-integer range) is read without throwing", () => {
+test("a real-world expires_utc (beyond JS safe-integer range) is read without throwing", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const root = tmp();
   makeChromiumDb(
     join(root, "Default"),
@@ -48,7 +52,9 @@ test("a real-world expires_utc (beyond JS safe-integer range) is read without th
   );
 });
 
-test("meta version < 24 does not strip a prefix", () => {
+test("meta version < 24 does not strip a prefix", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const root = tmp();
   makeChromiumDb(join(root, "Default"), [{ host_key: ".x.com", name: "auth_token", value: "0123456789abcdef" }], {
     password: "pw",
@@ -59,7 +65,9 @@ test("meta version < 24 does not strip a prefix", () => {
   assert.equal(r?.cookies.find((c) => c.name === "auth_token")?.value, "0123456789abcdef");
 });
 
-test("chooses the profile that has all loginCookies, not merely the most recent one", () => {
+test("chooses the profile that has all loginCookies, not merely the most recent one", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const root = tmp();
   makeChromiumDb(join(root, "Default"), [{ host_key: ".linkedin.com", name: "bcookie", value: "somebrowseridxxxx" }], {
     password: "pw",
@@ -78,7 +86,9 @@ test("chooses the profile that has all loginCookies, not merely the most recent 
   assert.equal(r?.source, "chrome:Profile 2");
 });
 
-test("two signed-in profiles: refuses to guess (not the most recently used), listing each profile's name and Google account", () => {
+test("two signed-in profiles: refuses to guess (not the most recently used), listing each profile's name and Google account", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const root = tmp();
   makeChromiumDb(
     join(root, "Default"),
@@ -132,7 +142,9 @@ test("two signed-in profiles: refuses to guess (not the most recently used), lis
   assert.equal(r?.email, "me@example.com");
 });
 
-test("one profile signed in, another with only tracking cookies: the signed-in one, no question asked", () => {
+test("one profile signed in, another with only tracking cookies: the signed-in one, no question asked", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const root = tmp();
   makeChromiumDb(join(root, "Default"), [{ host_key: ".reddit.com", name: "csv", value: "trackingcookie1" }], {
     password: "pw",
@@ -146,7 +158,9 @@ test("one profile signed in, another with only tracking cookies: the signed-in o
   assert.equal(importFromBrowsers({ url: "https://www.reddit.com" })?.source, "chrome:Profile 1");
 });
 
-test("a profile holding only the session cookie every visitor is given is not signed in: the one with a login is chosen", () => {
+test("a profile holding only the session cookie every visitor is given is not signed in: the one with a login is chosen", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const root = tmp();
   const visitor = { host_key: ".myshop.com", name: "laravel_session", value: "eyJpdiI6InZpc2l0b3Ii" };
   makeChromiumDb(join(root, "Default"), [visitor], { password: "pw" });
@@ -180,7 +194,9 @@ describe("re-import", () => {
   beforeEach(() => inject([{ name: "Chrome", family: "chromium", root, password: "pw" }]));
   after(() => delete process.env.API_ANYTHING_BROWSER);
 
-  test("the same login cookies again are no recovery: the hint names the profile to sign in to", async () => {
+  test("the same login cookies again are no recovery: the hint names the profile to sign in to", {
+    skip: "local copy: registry and browser-cookie import are removed",
+  }, async () => {
     saveSession("myshop", { cookies: [], values: {}, guestCookies: ["laravel_session"] });
     profile(visitor("eyJ2aXNpdG9yIjoxfQ"), login("eyJsb2dpbiI6MX0xx"));
     const first = await importSession("myshop", url, { pushProfile: false });
@@ -221,7 +237,9 @@ describe("re-import", () => {
     );
   });
 
-  test("a site whose login cookie no rule can name: any changed cookie is worth one retry, the same jar is not", async () => {
+  test("a site whose login cookie no rule can name: any changed cookie is worth one retry, the same jar is not", {
+    skip: "local copy: registry and browser-cookie import are removed",
+  }, async () => {
     saveSession("plain", { cookies: [], values: {} });
     const uid = (value: string) => ({ host_key: ".plainsite.com", name: "uid", value });
     makeChromiumDb(join(root, "Profile 3"), [uid("1001")], { password: "pw" });
@@ -261,7 +279,9 @@ test("guest cookie names: what a cookie-less visit is given, across the site's r
   assert.deepEqual(await knownGuests("members", "http://127.0.0.1:1/"), ["app_session", "older"]);
 });
 
-test("--profile pin overrides selection; a missing pin throws", () => {
+test("--profile pin overrides selection; a missing pin throws", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const root = tmp();
   makeChromiumDb(join(root, "Default"), [li, js], { password: "pw" });
   makeChromiumDb(join(root, "Profile 2"), [{ host_key: ".linkedin.com", name: "li_at", value: "differentprofilexx" }], {
@@ -279,7 +299,9 @@ test("--profile pin overrides selection; a missing pin throws", () => {
   );
 });
 
-test("a pinned import never opens another profile or browser's cookie database", () => {
+test("a pinned import never opens another profile or browser's cookie database", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const root = tmp();
   makeChromiumDb(join(root, "Default"), [li], { password: "pw" });
   mkdirSync(join(root, "Profile 2", "Network"), { recursive: true });
@@ -296,7 +318,9 @@ test("a pinned import never opens another profile or browser's cookie database",
   assert.equal(r?.cookies[0]?.value, li.value);
 });
 
-test("a profile pin without a browser still refuses matching accounts in different browsers", () => {
+test("a profile pin without a browser still refuses matching accounts in different browsers", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const roots = [tmp(), tmp()];
   for (const root of roots) makeFirefoxDb(join(root, "shared"), [li]);
   inject([
@@ -313,7 +337,9 @@ test("a profile pin without a browser still refuses matching accounts in differe
   );
 });
 
-test("only the site's own cookies are read", () => {
+test("only the site's own cookies are read", {
+  skip: "local copy: registry and browser-cookie import are removed",
+}, () => {
   const root = tmp();
   makeChromiumDb(join(root, "Default"), [li, { host_key: ".evil.com", name: "li_at", value: "shouldnotappearxx" }], {
     password: "pw",
@@ -335,7 +361,7 @@ test("a wrong Safe Storage password skips cookies rather than failing", () => {
   assert.ok(!r || r.cookies.every((c) => c.value !== "AQEDreallylongtokenvalue"));
 });
 
-test("Firefox plaintext moz_cookies", () => {
+test("Firefox plaintext moz_cookies", { skip: "local copy: registry and browser-cookie import are removed" }, () => {
   const root = tmp();
   makeFirefoxDb(join(root, "abc.default-release"), [
     { host_key: "www.linkedin.com", name: "li_at", value: "firefoxtokenvalue", expires_utc: 2000000000 },

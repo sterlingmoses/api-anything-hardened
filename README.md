@@ -1,3 +1,12 @@
+> [!IMPORTANT]
+> **This is a hardened fork of [goodnight000/api-anything](https://github.com/goodnight000/api-anything)
+> (release 0.3.2), made for safety.** Upstream sends searches to the author's catalog service and,
+> by default, uploads learned operations, reports calls and runs background checks from your
+> network. It also auto-updates through `npx` and reads cookies from your everyday browser. This fork
+> removes all of that: nothing is sent to the author's service. **[Why we forked, and every
+> change](FORK.md).** Text below that mentions the shared catalog or sharing describes upstream, not
+> this fork.
+
 <div align="center">
 
 <picture>
@@ -93,19 +102,17 @@ One site, one model, a few dozen runs. [Method, raw numbers and limits](bench/RE
 
 ## Quick start
 
-**1. Connect it to your agents** (Node 22.13+):
+**1. Clone, build and connect it to Claude Code** (Node 22.13+):
 
 ```sh
-npx -y api-anything setup
+git clone https://github.com/sterlingmoses/api-anything.git
+cd api-anything
+npm ci --ignore-scripts && npm run build
+node dist/cli.js setup --dry-run   # shows what it would change
+node dist/cli.js setup
 ```
 
-It connects the MCP server to Claude Code, Codex, Cursor and Claude Desktop, adds the skill to the
-agents that take skills, and asks one question: help build the shared catalog? The default is yes.
-Or paste this into your coding agent and let it do the setup:
-
-```text
-Set up API Anything for me: https://github.com/goodnight000/api-anything/blob/main/INSTALL.md
-```
+It connects this clone's MCP server to Claude Code and installs the skill. Nothing is shared.
 
 **2. Restart the agent and ask it something:**
 
@@ -114,7 +121,7 @@ Set up API Anything for me: https://github.com/goodnight000/api-anything/blob/ma
 **3. Or call an operation yourself:**
 
 ```sh
-npx -y api-anything call hacker-news search query=sqlite
+node dist/cli.js call hacker-news search query=sqlite
 ```
 
 ```text

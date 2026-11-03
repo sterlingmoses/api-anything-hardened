@@ -6,7 +6,7 @@
 import type { Operation } from "./spec.js";
 
 /** Production registry; API_ANYTHING_REGISTRY overrides it (https, or http to this machine for tests). */
-export const REGISTRY_API = "https://api-anything-registry.forth-site.workers.dev";
+export const REGISTRY_API = "https://registry.invalid"; // local copy: registry disabled
 
 /** Longest `GET /v1/search` q: a search answer repeats the query's words for each op it lists. */
 export const MAX_SEARCH_QUERY = 200;

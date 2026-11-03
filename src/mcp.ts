@@ -12,7 +12,6 @@ import { readFileSync } from "node:fs";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { idleWork } from "./background.js";
 import { BATCH_CONCURRENCY, BatchItemSchema, callReads } from "./batch.js";
 import { closeBrowser } from "./browser.js";
 import { describeOperation, inputSchema } from "./describe.js";
@@ -34,6 +33,7 @@ import { registerLearn } from "./mcp-learn.js";
 import { type Pulled, pull, search } from "./registry.js";
 import { settle } from "./report.js";
 import { getResult, MAX_RESULT_CHARS, MIN_RESULT_CHARS, type ResultView } from "./results.js";
+import { SERVER } from "./setup.js";
 import { type Operation, type Paging, readbackName } from "./spec.js";
 import { status } from "./status.js";
 import { listSites, loadSite, siteNotes } from "./store.js";
@@ -126,11 +126,11 @@ export function mcpNext(next: string): string {
           ? `the login tool {"site":"${site}","mode":"window"} (the user signs in or clears the challenge by hand)`
           : userImported(site)
             ? `the login tool {"site":"${site}"} (mode "window" when the user must sign in or clear a challenge by hand)`
-            : `ask the user to run in a terminal: api-anything login ${site} (it imports the cookies of the browser they are signed in with, no password), or api-anything login ${site} --window to sign in by hand`,
+            : `ask the user to run in a terminal: api-anything login ${site} --window to sign in by hand`,
     )
     .replace(/api-anything add creates one/, "a new site is added with the CLI");
   return /\bapi-anything (heal|add|capture|verify|export|publish|setup)\b/.test(out)
-    ? `${out} (api-anything is a CLI: run it in your shell, as npx -y api-anything when the command is not installed; with no shell, ask the user)`
+    ? `${out} (api-anything is a CLI: run it in your shell as node ${SERVER.args[0]}, never through npx; with no shell, ask the user)`
     : out;
 }
 
@@ -914,21 +914,8 @@ async function importLogin(t: ReturnType<typeof resolveLoginTarget>): Promise<Re
 export async function serveStdio(opts: ServerOptions = {}): Promise<void> {
   const transport = new StdioServerTransport();
   await createServer(opts).connect(transport);
-  // every message in or out is activity: background verification waits for a quiet minute
-  const idle = idleWork();
-  const handle = transport.onmessage;
-  transport.onmessage = (message) => {
-    idle.touch();
-    handle?.(message);
-  };
-  const send = transport.send.bind(transport);
-  transport.send = (message) => {
-    idle.touch();
-    return send(message);
-  };
   // An open Chrome keeps the process alive after the client goes away.
   process.stdin.once("end", () => {
-    idle.stop();
     void settle(1500)
       .then(closeBrowser)
       .finally(() => process.exit(0));

@@ -8,7 +8,7 @@ import { rmSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
 import { loadRecord, opHash } from "./checks.js";
-import { loadSettings, signedHeaders } from "./identity.js";
+import { loadSettings } from "./identity.js";
 import { MAX_SEARCH_QUERY, REGISTRY_API, type ServedSite, type Status } from "./registry-api.js";
 import { indexEntry, matchQuery, operationMatch, type QueryMatch, summarize } from "./search.js";
 import { dropUnbound, home, loadSession, readJson, safeName, siteOf, writePrivate } from "./session.js";
@@ -44,7 +44,7 @@ export class RegistryError extends Error {
  */
 export async function registryRequest<T>(
   path: string,
-  o: {
+  _o: {
     method?: "GET" | "POST";
     body?: unknown;
     signed?: boolean;
@@ -53,43 +53,8 @@ export async function registryRequest<T>(
     signal?: AbortSignal;
   } = {},
 ): Promise<T> {
-  const url = `${registryBase()}${path}`;
-  const method = o.method ?? "GET";
-  const text = o.body === undefined ? "" : JSON.stringify(o.body);
-  const u = new URL(url);
-  const timeout = AbortSignal.timeout(o.timeoutMs ?? 20_000);
-  const res = await fetch(url, {
-    method,
-    headers: {
-      ...(o.body !== undefined ? { "content-type": "application/json" } : {}),
-      ...(o.signed ? signedHeaders(method, u.pathname + u.search, text) : {}),
-    },
-    ...(o.body !== undefined ? { body: text } : {}),
-    redirect: "error",
-    signal: o.signal ? AbortSignal.any([timeout, o.signal]) : timeout,
-  }).catch((e: Error) => {
-    throw new RegistryError(`${url} could not be reached (${e.message})`);
-  });
-  const cap = o.cap ?? 1024 * 1024;
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  for await (const chunk of res.body ?? []) {
-    size += chunk.byteLength;
-    if (size > cap) throw new RegistryError(`${url} is over ${cap} bytes`, res.status);
-    chunks.push(chunk);
-  }
-  let body: unknown;
-  try {
-    body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
-  } catch {
-    throw new RegistryError(`${url} answered ${res.status}, not JSON`, res.status);
-  }
-  if (!res.ok) {
-    const e = body as { error?: unknown; reasons?: unknown };
-    const why = [e.error, ...(Array.isArray(e.reasons) ? e.reasons : [])].filter((x) => typeof x === "string");
-    throw new RegistryError(`${url} answered ${res.status}${why.length ? `: ${why.join("; ")}` : ""}`, res.status);
-  }
-  return body as T;
+  // local copy: the shared registry is off, so nothing leaves this machine for it
+  throw new RegistryError(`the shared registry is disabled in this local copy (${path})`);
 }
 
 export interface Pulled {

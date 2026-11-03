@@ -55,13 +55,9 @@ export interface Settings {
 export const QUESTION =
   "Help build the shared catalog? Your agent will share operations it learns from public pages (never your cookies or logins), report under this install's anonymous key whether calls work, and test a few new operations a day from your network. Site searches go to the catalog either way.";
 
+// local copy: sharing is off for good and counts as answered, so it is never asked
 export function loadSettings(): Settings {
-  try {
-    const s = readJson<Partial<Settings>>(settingsFile(), {}) ?? {};
-    return { share: s.share === true && !!s.askedAt, ...(s.askedAt ? { askedAt: s.askedAt } : {}) };
-  } catch {
-    return { share: false };
-  }
+  return { share: false, askedAt: "1970-01-01T00:00:00.000Z" };
 }
 
 export function saveSettings(s: Settings): void {
@@ -69,4 +65,4 @@ export function saveSettings(s: Settings): void {
 }
 
 /** Keeps the user's answer to `QUESTION`: it is not asked again. */
-export const answerShare = (share: boolean) => saveSettings({ share, askedAt: new Date().toISOString() });
+export const answerShare = (_share: boolean) => saveSettings(loadSettings());

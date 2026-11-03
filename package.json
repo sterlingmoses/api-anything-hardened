@@ -1,5 +1,5 @@
 {
-  "name": "api-anything",
+  "name": "api-anything-local",
   "version": "0.3.2",
   "description": "Learn reusable operations from a website's browser traffic and call them from a CLI, library or MCP server.",
   "license": "MIT",
@@ -37,8 +37,7 @@
     "lint": "biome ci .",
     "format": "biome check --write .",
     "demo": "node examples/research.mjs",
-    "smoke:pack": "node --import tsx test/smoke-pack.ts",
-    "prepublishOnly": "npm run check && npm run lint"
+    "smoke:pack": "node --import tsx test/smoke-pack.ts"
   },
   "keywords": [
     "api",
@@ -51,23 +50,24 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/goodnight000/api-anything.git"
+    "url": "git+https://github.com/sterlingmoses/api-anything.git"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.32.1",
-    "node-html-parser": "^9.0.4",
-    "playwright-core": "^1.63.0",
-    "tldts": "^7.4.16",
-    "zod": "^4.6.7"
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "node-html-parser": "9.0.4",
+    "playwright-core": "1.63.0",
+    "tldts": "7.4.16",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
-    "@types/node": "^26.6.3",
-    "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "@types/node": "26.6.3",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
   },
-  "homepage": "https://api-anything-registry.forth-site.workers.dev",
+  "homepage": "https://github.com/sterlingmoses/api-anything#readme",
   "bugs": {
-    "url": "https://github.com/goodnight000/api-anything/issues"
-  }
+    "url": "https://github.com/sterlingmoses/api-anything/issues"
+  },
+  "private": true
 }

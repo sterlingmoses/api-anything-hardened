@@ -313,18 +313,11 @@ const HELP: Record<string, string> = {
                   Gemini CLI, VS Code, Cursor and Claude Desktop, with absolute paths and the other
                   flags given, instead of serving
   --no-learn      hide learn_site`,
-  setup: `api-anything setup [--yes | --no-share] [--share-only] [--agents claude-code,codex,cursor,claude-desktop] [--dry-run]
-  Connects the MCP server (npx -y api-anything mcp) to each agent found on this machine: Claude Code,
-  Codex, Cursor, Claude Desktop. Installs the skill for Claude Code (~/.claude/skills) and Codex
-  (~/.agents/skills). Checks for a Chromium browser, makes this install's key, and asks whether to help
-  build the shared catalog (default yes). Other entries in an agent's config are never changed; a file
-  is backed up to <file>.bak-api-anything before its first edit. Running it again changes nothing.
-  --yes        share: answer the question yes without asking
-  --no-share   do not share; answer the question no
-  --share-only record --yes or --no-share and nothing else: no agent, skill or key is touched. learn_site
-               asks the question the first time something could be shared; this records the answer
-               given in chat, and changes it later
-  --agents     connect these agents only, found or not
+  setup: `api-anything setup [--dry-run]
+  Local copy: connects this checkout's MCP server (node <repo>/dist/cli.js mcp) to Claude Code only, and
+  installs the skill (~/.claude/skills). Checks for a Chromium browser. Sharing is always off.
+  Other entries in Claude Code's config are never changed; a file is backed up to
+  <file>.bak-api-anything before its first edit. Running it again changes nothing.
   --dry-run    print what would change, and change nothing`,
   learn: `api-anything learn <trigger> --args k=v --args2 k=v --args3 k=v [--site s] [--op o] [--intent text] [options]
   Learns a read in one step and returns the answer to --args (as MCP learn_site does): runs the page with
