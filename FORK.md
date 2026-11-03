@@ -84,7 +84,7 @@ local search, `login --window`, `login --cookies <file>`.
 ## Use
 
 ```bash
-git clone https://github.com/sterlingmoses/api-anything.git && cd api-anything
+git clone https://github.com/sterlingmoses/api-anything-hardened.git && cd api-anything-hardened
 npm ci --ignore-scripts && npm run build
 node dist/cli.js setup --dry-run   # shows what it would change
 node dist/cli.js setup             # adds the MCP server to Claude Code, installs the skill

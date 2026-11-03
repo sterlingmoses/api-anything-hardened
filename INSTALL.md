@@ -10,8 +10,8 @@ Instructions for a person or a coding agent. This fork runs from a clone; never 
 ## 2. Clone and build
 
 ```sh
-git clone https://github.com/sterlingmoses/api-anything.git
-cd api-anything
+git clone https://github.com/sterlingmoses/api-anything-hardened.git
+cd api-anything-hardened
 npm ci --ignore-scripts
 npm run build
 ```

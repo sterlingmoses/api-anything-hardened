@@ -105,8 +105,8 @@ One site, one model, a few dozen runs. [Method, raw numbers and limits](bench/RE
 **1. Clone, build and connect it to Claude Code** (Node 22.13+):
 
 ```sh
-git clone https://github.com/sterlingmoses/api-anything.git
-cd api-anything
+git clone https://github.com/sterlingmoses/api-anything-hardened.git
+cd api-anything-hardened
 npm ci --ignore-scripts && npm run build
 node dist/cli.js setup --dry-run   # shows what it would change
 node dist/cli.js setup

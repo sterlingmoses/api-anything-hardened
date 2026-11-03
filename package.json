@@ -1,5 +1,5 @@
 {
-  "name": "api-anything-local",
+  "name": "api-anything-hardened",
   "version": "0.3.2",
   "description": "Learn reusable operations from a website's browser traffic and call them from a CLI, library or MCP server.",
   "license": "MIT",
@@ -50,7 +50,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sterlingmoses/api-anything.git"
+    "url": "git+https://github.com/sterlingmoses/api-anything-hardened.git"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
@@ -65,9 +65,9 @@
     "tsx": "4.23.15",
     "typescript": "7.0.2"
   },
-  "homepage": "https://github.com/sterlingmoses/api-anything#readme",
+  "homepage": "https://github.com/sterlingmoses/api-anything-hardened#readme",
   "bugs": {
-    "url": "https://github.com/sterlingmoses/api-anything/issues"
+    "url": "https://github.com/sterlingmoses/api-anything-hardened/issues"
   },
   "private": true
 }
